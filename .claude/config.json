@@ -23,9 +23,10 @@
       ".claude/hooks/",
       ".claude/settings.json",
       ".claude/config.json",
+      ".github/",
       ".env"
     ],
-    "_always_comment": "The governor may not edit itself.",
+    "_always_comment": "The governor may not edit itself. .github/ is here because CI is the only check that runs outside the agent's reach - an agent that can rewrite the workflow can delete its own gate. It also becomes an exfiltration path the moment a repo secret exists (e.g. ANTHROPIC_API_KEY for evals): the workflow runs on GitHub's runner, where danger_block cannot see it.",
     "unlock_file": ".claude/.unlock",
     "_unlock_comment": "To amend a frozen test: human runs `touch .claude/.unlock` (or writes a path prefix into it), agent makes the change, hook consumes and deletes the unlock. Every unlock is logged to .claude/.events.log and must be named in the slice log."
   },
