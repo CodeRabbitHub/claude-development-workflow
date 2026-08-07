@@ -145,6 +145,13 @@ jobs:
 
       - name: Check 4 — no-slop mechanical subset
         # The judgment half stays human. These are the items a grep can decide.
+        #
+        # Two self-reference guards, both learned the hard way when this step
+        # flagged its OWN pattern list as a finding:
+        #   - .github is excluded from the scanned diff (workflows are infra).
+        #   - every pattern is written so its literal text cannot match it:
+        #     "[T]ODO" matches the string TODO, but the source line contains
+        #     "[T]ODO", which does not. Do not "tidy" these brackets away.
         # grep returns 1 when it finds nothing, which is the GOOD case here -
         # so every grep is wrapped in an `if` rather than left bare, or bash -e
         # would fail the step on a clean diff.
@@ -154,18 +161,19 @@ jobs:
             echo "::notice::No comparable base ($BASE) - skipping. First commit on a fresh repo."
             exit 0
           fi
-          git diff "$BASE"...HEAD -- . ':!plans' ':!artifacts' ':!templates' ':!*.md' \
+          git diff "$BASE"...HEAD -- . \
+            ':!plans' ':!artifacts' ':!templates' ':!.github' ':!*.md' \
             | grep '^+' | grep -v '^+++' > /tmp/added.txt || true
 
           fail=0
-          if grep -nE "TODO|FIXME|XXX" /tmp/added.txt; then
+          if grep -nE "[T]ODO|[F]IXME|[X]XX" /tmp/added.txt; then
             echo "::error::category 9: unresolved TODO/FIXME in the diff"
             fail=1
           fi
-          if grep -nE "console\.log\(|debugger;" /tmp/added.txt; then
+          if grep -nE "[c]onsole\.log\(|[d]ebugger;" /tmp/added.txt; then
             echo "::warning::category 9: possible debug output left in"
           fi
-          if grep -inE "(api[_-]?key|secret|password|token)[[:space:]]*[:=][[:space:]]*['\"][^'\"]{12,}" /tmp/added.txt; then
+          if grep -inE "([a]pi[_-]?key|[s]ecret|[p]assword|[t]oken)[[:space:]]*[:=][[:space:]]*['\"][^'\"]{12,}" /tmp/added.txt; then
             echo "::error::possible hardcoded secret"
             fail=1
           fi
