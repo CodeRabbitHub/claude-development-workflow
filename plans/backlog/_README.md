@@ -1,6 +1,6 @@
 # Backlog — pre-written briefs, queued
 
-Files here are full briefs (templates/brief.md, all six fields) waiting
+Files here are full briefs (every field in templates/brief.md) waiting
 their turn. `/next` pops the lowest-numbered one, validates it, moves it
 to `plans/briefs/`, and starts the slice.
 

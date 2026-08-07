@@ -136,8 +136,12 @@ Goal:         the one outcome, in a sentence.
 Constraints:  what it must (and must not) do. Stack, perf, style, security.
 Inputs:       what the agent starts with. Files, data, an API, an example.
 Outputs:      what exists when it's finished. Files, endpoints, behavior.
+Assumptions:  what you're taking as true without checking. Unstated ones
+              get resolved silently by the agent — that's where slices go wrong.
+Expected size: files and lines, against diff_cap. Over cap = cut it now.
 Done-check:   the concrete test that proves it works.
 Out-of-scope: what NOT to touch, so it doesn't wander.
+Rollback:     how this gets undone. Named now, not after it's built.
 ```
 
 The `/brief` skill interviews me into these fields and **refuses to save**
