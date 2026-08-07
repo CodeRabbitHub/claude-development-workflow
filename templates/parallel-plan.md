@@ -10,8 +10,29 @@ Goal:
 Workstream A: <link to its brief>
 Workstream B: <link to its brief>
 
+Max 3 streams. Beyond that YOU are the bottleneck — the gates queue up
+and the extra streams just generate work you cannot review.
+
+The real payoff is not speed. It is that parallel streams ABSORB GATE
+LATENCY: when one stream hits Gate 2 at 03:00 and waits for you, the
+others keep working until morning instead of the machine idling.
+
+File ownership:
+<!-- Every stream declares the files it OWNS. One owner per file, no
+     exceptions. Any file two streams both need goes on the shared list
+     below and is serialized instead — built by one stream, consumed by
+     the other after merge. -->
+| Stream | Owns |
+|---|---|
+| A |  |
+| B |  |
+
 Shared files:
-<!-- The collision list. Best case: empty. If long, stop and re-cut. -->
+<!-- The collision list. Best case: empty. If long, stop and re-cut.
+     Merge conflicts are cheap and loud. The expensive ones are SEMANTIC:
+     two streams change the same contract in ways that both look right,
+     merge clean, and fail together. File ownership is what prevents that;
+     git cannot. -->
 
 Review gate:
 <!-- Who gates each stream, and the checklist applied. Each stream gates
