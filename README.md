@@ -1,8 +1,37 @@
-# FDE Starter Kit
+# Claude Development Workflow
 
-A copyable operating system for building projects with AI agents:
-contracts before code, evidence over claims, two human gates per slice,
-and automation that compounds. Method: RUNBOOK.md. Cheat sheet: WORKFLOW.md.
+**A disciplined operating system for building software with AI agents —
+contracts before code, evidence over claims, and enforcement that doesn't
+depend on anyone remembering the rules.**
+
+Copy this repo into a new project and you get a complete loop: every slice
+of work starts as a written contract, gets tests derived from that contract
+before any code exists, and passes two human gates before it merges. The
+rules are wired into hooks and CI rather than living in a document, so they
+hold at 3am and under deadline — which is exactly when they'd otherwise be
+skipped.
+
+Built for Claude Code, but the method is harness-agnostic; only the
+`.claude/` directory is Claude-specific.
+
+**What makes it different from a prompt library:**
+
+- **Tests are frozen.** They're written from the brief before the
+  implementation, and a hook stops the builder from editing them to make
+  them pass — the single failure mode that makes agent-written code look
+  finished when it isn't.
+- **The agent can't grade its own homework.** It can't claim "done" while
+  tests fail, *or* while they can't be run at all. It can't edit its own
+  hooks, config, or CI workflow. CI re-checks everything on a clean machine.
+- **It runs unattended.** Gates push to your phone, a queue feeds the next
+  slice automatically, and a deadman switch pages you when the agent goes
+  silent — the one failure nothing else can report.
+- **It compounds.** Every correction made twice gets promoted up a ladder:
+  chat → rule → hook → skill → subagent → eval. Each project ends with the
+  kit stronger than it started.
+
+Full method and reasoning: [RUNBOOK.md](RUNBOOK.md).
+One-page cheat sheet: [WORKFLOW.md](WORKFLOW.md).
 
 ## Start a new project
 
