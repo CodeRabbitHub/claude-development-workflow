@@ -72,7 +72,28 @@ jobs:
             exit 1
           fi
 
+      - name: Is this the bare kit, or a real project?
+        # The kit ships with an empty tests/ and no source. "Zero tests
+        # collected" must FAIL a project (green with no tests proves
+        # nothing) but must not fail the template before any project
+        # exists. Bootstrap = no test files and no source outside the kit's
+        # own scaffolding.
+        id: mode
+        run: |
+          TESTS=$(find tests -name '*.py' -o -name '*.js' -o -name '*.ts' 2>/dev/null | wc -l)
+          SRC=$(git ls-files \
+                | grep -vE '^(\.claude/|\.github/|templates/|plans/|artifacts/|evals/|tests/|docs/)' \
+                | grep -E '\.(py|js|ts|tsx|go|rs|rb|java)$' | wc -l)
+          if [ "$TESTS" -eq 0 ] && [ "$SRC" -eq 0 ]; then
+            echo "bootstrap=true" >> $GITHUB_OUTPUT
+            echo "::notice::Bare kit detected (no tests, no source). Skipping test and eval checks until the first slice lands."
+          else
+            echo "bootstrap=false" >> $GITHUB_OUTPUT
+            echo "Project mode: $TESTS test file(s), $SRC source file(s)."
+          fi
+
       - name: Check 3 — tests pass, freshly, and actually ran
+        if: steps.mode.outputs.bootstrap == 'false'
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: |
@@ -81,11 +102,12 @@ jobs:
           set -o pipefail
           $CMD 2>&1 | tee /tmp/test.out
           if grep -qE "Ran 0 tests|NO TESTS RAN|collected 0 items" /tmp/test.out; then
-            echo "::error::Suite collected zero tests - green here proves nothing"
+            echo "::error::Source exists but the suite collected zero tests - green here proves nothing"
             exit 1
           fi
 
       - name: Check 3b — evals did not regress
+        if: steps.mode.outputs.bootstrap == 'false'
         run: |
           EVAL=$(python3 -c "import json;c=json.load(open('.claude/config.json'));print(' '.join(c['eval_command']) if c.get('eval_command') else '')")
           if [ -z "$EVAL" ]; then
