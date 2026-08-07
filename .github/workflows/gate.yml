@@ -40,22 +40,49 @@ jobs:
       - name: Hooks still block what they claim to block
         # A regression here means enforcement quietly weakened. Catch it in CI,
         # not at 3am.
+        #
+        # NOTE: these hooks return exit 2 BY DESIGN ("blocked"). GitHub runs
+        # every step under `bash -e`, which aborts the step on any non-zero
+        # command - so a bare probe call kills the step with code 2 precisely
+        # WHEN THE HOOK IS WORKING. Every probe therefore runs inside an `if`
+        # condition, which set -e deliberately ignores.
         run: |
           fail=0
-          check_blocked() {
-            echo "{\"tool_input\":{\"command\":\"$1\"}}" | python3 .claude/hooks/danger_block.py >/dev/null 2>&1
-            [ $? -eq 2 ] || { echo "::error::danger_block no longer blocks: $1"; fail=1; }
+          probe_bash() {
+            if echo "{\"tool_input\":{\"command\":\"$1\"}}" \
+               | python3 .claude/hooks/danger_block.py >/dev/null 2>&1; then
+              echo "::error::danger_block no longer blocks: $1"
+              fail=1
+            fi
           }
-          check_blocked "rm -rf /"
-          check_blocked "rm -r -f build"
-          check_blocked "git push --force origin main"
-          check_blocked "git reset --hard"
+          probe_bash "rm -rf /"
+          probe_bash "rm -r -f build"
+          probe_bash "git push --force origin main"
+          probe_bash "git reset --hard"
+
+          # False-positive guard: a hook that blocks everything is as broken
+          # as one that blocks nothing.
+          if ! echo '{"tool_input":{"command":"git status"}}' \
+               | python3 .claude/hooks/danger_block.py >/dev/null 2>&1; then
+            echo "::error::danger_block now blocks harmless commands"
+            fail=1
+          fi
+
           mkdir -p tests && touch tests/test_frozen_probe.py
-          echo '{"tool_name":"Edit","tool_input":{"file_path":"tests/test_frozen_probe.py"}}' \
-            | python3 .claude/hooks/guard_writes.py >/dev/null 2>&1
-          [ $? -eq 2 ] || { echo "::error::guard_writes no longer freezes tests"; fail=1; }
+          if echo '{"tool_name":"Edit","tool_input":{"file_path":"tests/test_frozen_probe.py"}}' \
+             | python3 .claude/hooks/guard_writes.py >/dev/null 2>&1; then
+            echo "::error::guard_writes no longer freezes existing tests"
+            fail=1
+          fi
+          if ! echo '{"tool_name":"Write","tool_input":{"file_path":"src/probe_new.py"}}' \
+               | python3 .claude/hooks/guard_writes.py >/dev/null 2>&1; then
+            echo "::error::guard_writes now blocks ordinary source writes"
+            fail=1
+          fi
           rm -f tests/test_frozen_probe.py
-          exit $fail
+
+          if [ "$fail" -ne 0 ]; then exit 1; fi
+          echo "All hook probes behaved correctly."
 
       - name: Check 1 — diff within cap
         if: github.event_name == 'pull_request'
@@ -118,14 +145,30 @@ jobs:
 
       - name: Check 4 — no-slop mechanical subset
         # The judgment half stays human. These are the items a grep can decide.
+        # grep returns 1 when it finds nothing, which is the GOOD case here -
+        # so every grep is wrapped in an `if` rather than left bare, or bash -e
+        # would fail the step on a clean diff.
         run: |
           BASE="${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || 'HEAD~1' }}"
-          ADDED=$(git diff "$BASE"...HEAD -- . ':!plans' ':!artifacts' ':!templates' ':!*.md' \
-                  | grep '^+' | grep -v '^+++' || true)
+          if ! git rev-parse --verify "$BASE" >/dev/null 2>&1; then
+            echo "::notice::No comparable base ($BASE) - skipping. First commit on a fresh repo."
+            exit 0
+          fi
+          git diff "$BASE"...HEAD -- . ':!plans' ':!artifacts' ':!templates' ':!*.md' \
+            | grep '^+' | grep -v '^+++' > /tmp/added.txt || true
+
           fail=0
-          echo "$ADDED" | grep -nE "TODO|FIXME|XXX" && { echo "::error::category 9: unresolved TODO/FIXME in the diff"; fail=1; }
-          echo "$ADDED" | grep -nE "console\.log\(|(^|[^.\w])print\(|debugger;" && { echo "::warning::category 9: possible debug output left in"; }
-          echo "$ADDED" | grep -nE "(api[_-]?key|secret|password|token)\s*[:=]\s*['\"][^'\"]{12,}" && { echo "::error::possible hardcoded secret"; fail=1; }
+          if grep -nE "TODO|FIXME|XXX" /tmp/added.txt; then
+            echo "::error::category 9: unresolved TODO/FIXME in the diff"
+            fail=1
+          fi
+          if grep -nE "console\.log\(|debugger;" /tmp/added.txt; then
+            echo "::warning::category 9: possible debug output left in"
+          fi
+          if grep -inE "(api[_-]?key|secret|password|token)[[:space:]]*[:=][[:space:]]*['\"][^'\"]{12,}" /tmp/added.txt; then
+            echo "::error::possible hardcoded secret"
+            fail=1
+          fi
           exit $fail
 
       - name: Dependency change requires an architecture amendment
