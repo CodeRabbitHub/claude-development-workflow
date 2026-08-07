@@ -93,6 +93,8 @@ One-page cheat sheet: [WORKFLOW.md](WORKFLOW.md).
 CLAUDE.md  PLAN.md  ARCHITECT.md  HANDOFF.md   the project's head
 RUNBOOK.md  WORKFLOW.md                        the method
 templates/                                     blank forms (source of truth)
+  brief · log · review · re-plan · design-note
+  no-slop · eval · parallel-plan · handoff
 plans/briefs/  plans/logs/                     contracts and evidence
 plans/backlog/                                 queued briefs for /next
 artifacts/reviews/  artifacts/design/          gate records, visual contracts

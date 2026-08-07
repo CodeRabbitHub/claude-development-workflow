@@ -13,8 +13,13 @@ cheap filter for the next.
 2. CHECK 2 — goal match. Restate the brief's Goal, then summarize what the
    diff actually does. Flag any mismatch in either direction (extra
    "improvements" are a mismatch too).
-3. CHECK 3 — tests/evals. Run the brief's done-check FRESH (and the eval
-   set if LLM behavior changed). Paste real output, never a summary.
+3. CHECK 3 — tests/evals. Run the brief's done-check FRESH (and the WHOLE
+   eval set if LLM behavior changed). Paste real output, never a summary.
+   For evals: read the last row of the eval's Score history table as the
+   baseline, record the new score with its provenance (model, prompt
+   version), and append a row. A drop blocks the merge. If the model
+   version changed since the baseline, say so — that is a different finding
+   from a regression you caused.
 4. CHECK 4 — no-slop. Dispatch the no-slop-reviewer subagent on the diff.
    Fix mechanical findings; present judgment findings to the user. No
    unresolved findings may remain.

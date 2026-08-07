@@ -11,8 +11,8 @@ Close the loop: write what the next session will read first.
    this session. No "should work". If it wasn't verified, list it under
    open questions instead.
 3. Paste the latest proof output.
-4. Write the FULL brief for the next slice (all six templates/brief.md
-   fields), using the "next smallest slice" line from the log as the seed.
+4. Write the FULL brief for the next slice (every
+   templates/brief.md field), using the "next smallest slice" line from the log as the seed.
    Apply the same pushback rules as /brief: single-outcome goal, binary and
    runnable done-check, non-empty out-of-scope.
 5. Confirm with the user, save, then tell them: /clear — the next slice

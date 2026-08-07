@@ -23,8 +23,9 @@ ONCE PER PROJECT  (Phase 0, ~30 min)
 
 PER SLICE  (the engine — fresh session, own branch)     artifact left behind
    1  READ      session reads HANDOFF.md                 —
-   2  BRIEF     /brief — six lines: goal, constraints,   plans/briefs/…
-                inputs, outputs, done-check, out-of-scope
+   2  BRIEF     /brief — the contract: goal, constraints,  plans/briefs/…
+                inputs, outputs, assumptions, done-check,
+                out-of-scope, rollback
    3  PLAN      plan mode; design note if user-facing    artifacts/design-note
                 (Stitch/Figma export → artifacts/design/ = visual contract)
                 ⟨ GATE 1 — you approve plan + design ⟩

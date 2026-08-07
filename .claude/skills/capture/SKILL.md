@@ -18,4 +18,9 @@ Record the evidence for the slice that just merged.
 4. If "rejected or changed" repeats a pattern from a previous log, propose
    the promotion: a new line in CLAUDE.md standing rules or
    templates/no-slop.md. Apply it if the user agrees.
-5. Save to plans/logs/YYYY-MM-DD-<slug>.md.
+5. If .claude/.replan_needed exists, the breaker fired on this slice:
+   write plans/logs/YYYY-MM-DD-<slug>-replan.md from templates/re-plan.md
+   BEFORE anything else. What the three attempts revealed is the highest
+   value artifact the loop produces and it is lost the moment the session
+   clears. Diagnose first; the new brief is the consequence, not the point.
+6. Save to plans/logs/YYYY-MM-DD-<slug>.md.

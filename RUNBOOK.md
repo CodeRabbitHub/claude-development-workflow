@@ -129,7 +129,7 @@ the brief for this slice (written by the previous session while its context
 was hot). This is why a fresh session starts smart, not cold.
 
 ### Step 2 — BRIEF (`/brief`)
-The contract, exactly six lines:
+The contract — every field binding:
 
 ```
 Goal:         the one outcome, in a sentence.
@@ -148,6 +148,11 @@ A brief that's hard to fill in means the slice is too big or the plan above
 it is too vague — fix that first.
 
 ### Step 3 — PLAN (Gate 1)
+
+If the slice touches anything a user sees — a page, a CLI output, an
+endpoint's response shape, a report — write `templates/design-note.md`
+first. Its empty/loading/error section is the part that earns its keep: the
+happy path gets designed anyway, those three do not.
 The agent proposes an approach in plan mode — no code yet. If the slice has
 a user-facing surface, a **design note** is written now: who uses it, the
 decision, the one rejected alternative, why. External design tools (Stitch,
@@ -365,7 +370,12 @@ repeated quality failure → **eval case** → repeated "can you paste me X" →
 **MCP connector**. Each promotion converts a recurring cost into a one-time
 investment.
 
-**The circuit breaker: 3 failures → re-plan.** Every retry loop is capped
+**The circuit breaker: 3 failures → re-plan.** Its output is written to
+`templates/re-plan.md`, not left in chat: the diagnosis of three genuinely
+different failures is the most informative artifact the loop produces, and
+it decides which thing changes — brief, tests, architecture, or slice
+boundary. "The code" is the one answer attempts 1–3 already disproved.
+ Every retry loop is capped
 at three attempts. Three genuinely different failures means the problem is
 one level up — an ambiguous brief, a wrong architecture assumption, a bad
 test. The agent must stop, report what each attempt revealed, and hand the

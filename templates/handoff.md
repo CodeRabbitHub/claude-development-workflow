@@ -18,5 +18,7 @@ Goal:
 Constraints:
 Inputs:
 Outputs:
+Assumptions:
 Done-check:
 Out-of-scope:
+Rollback:

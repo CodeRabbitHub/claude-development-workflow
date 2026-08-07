@@ -27,7 +27,11 @@ Files: ___ / cap ___    Lines: ___ / cap ___
      are captured but never gated are an archive, not a check — the
      previous score goes in the box below so regression is visible. -->
 
-Eval score: ___ (previous: ___)  — a drop blocks the merge.
+Eval score: ___ (previous: ___ , from the eval's Score history table)
+Model / prompt version this run: ___
+<!-- A drop blocks the merge. If the model version differs from the
+     baseline row, that is a model change, not necessarily a regression —
+     say which it is rather than letting the number decide for you. -->
 ```
 <paste>
 ```

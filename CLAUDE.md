@@ -40,5 +40,6 @@ Read HANDOFF.md first — it holds current state and the next brief.
 - Machinery config: .claude/config.json (test cmd, diff cap, protected paths)
 - Unattended running: .claude/watchdog.py · queue in plans/backlog/ · /next
 - Event log: .claude/.events.log (gitignored)
+- User-facing slice? Write templates/design-note.md before planning.
 - Blank forms: templates/ (skills and the reviewer agent read these — edit
   the template, and every future use updates with it)
